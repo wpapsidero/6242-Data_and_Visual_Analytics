@@ -1,0 +1,21 @@
+1. Ease to develop for developers
+    R: Flexible, relatively user-friendly environment with low learning curve, and abundant resources.
+    Tableau: Rigid, user-friendly environment with low learning curve, least time consuming.
+    D3: Flexible, non-user-friendly environment with high learning curve, extremely time consuming, with very limited resources and poor flexibility between versions.
+2. Ease to maintain the visualization for developers (e.g., difficulty of the maintenance of the product as the requirements change, the data changes, the hosting platform changes, etc.) 
+    R: Easy to trace impacts from changes, and impacts are relatively isolated within the code
+    Tableau: Easy to make changes when needed, adaptive.
+    D3: Breaks with changes to data formatting, needs a lot of debugging to find where the change impacts the code
+3. Usability of visualization developed for end users
+    R: not interactive but clean and easy to interpret, the least aesthetically pleasing.
+    Tableau: Interactive limited to using dashboard, but clean and easy to interpret.
+    D3: most interactive, can easily adjust zoom in on more specific data where the user shows interest.
+4. Scalability of visualization to “large” datasets
+    R: rigid in scalability, needs multiple charts.
+    Tableau: being a tool focused on data visualization makes this flexible when operating in a dashboard.
+    D3: the interactivity makes this the best at scaling to visualize large data sets.
+5. System requirements to run the visualization (e.g., browsers, OS, software licensing) for end users
+    R: requires an image viewing software, or R. 
+    Tableau: requires Tableau reader for interacting with dashboards, or for images requires an image viewing software.
+    D3: requires a browser, often specific browser to run the way it was developed, may need a terminal. 
+…

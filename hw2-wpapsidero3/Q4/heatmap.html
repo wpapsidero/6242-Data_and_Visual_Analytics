@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.tile {
+  shape-rendering: crispEdges;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<script src="../lib/d3.v5.min.js"></script>
+<script>
+
+var margin = {top: 20, right: 90, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+//var parseDate = d3.time.format("%Y-%m-%d").parse,
+//   formatDate = d3.time.format("%b %d");
+
+var x = d3.scaleBand().range([ 0, width ]),
+    y = d3.scaleLinear().range([height, 0]),
+    z = d3.scaleLinear().range(["white", "steelblue"]);
+
+// The size of the earthquake count in the CSV data file.
+// This could be inferred from the data if it weren't sparse.
+var xStep = 1,
+    yStep = 1;
+
+
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("earthquakes.csv").then(function(earthquakes) {
+  
+  var state_data = ["Alabama","Alaska", "Arizona", "Arkansas", "California", "Colorado", "Hawaii", "Idaho", "Illinois", "Indiana", "Kansas", "Maine", "Mississippi", 
+  "Missouri", "Montana", "Nebraska", "Nevada", "New Mexico", "New York", "Ohio", "Oklahoma", "Oregon", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Virginia", "Washington", "Wyoming"
+];
+  var long_data = [];
+  earthquakes.forEach( function(row) {
+    // Loop through all of the columns, and for each column
+    // make a new row
+    Object.keys(row).forEach( function(colname) {
+      // Ignore 'State' and 'Value' columns
+      if(colname == "States" || colname == "Value"|| colname == "Category") {
+        return
+      }
+      long_data.push({"States": row["States"], "Value": row[colname], "Year": colname,});
+      
+    });
+
+
+  });
+
+
+  // Coerce the CSV data to the appropriate types. debug:need to figure out how to have numeric titles=check
+  long_data.forEach(function(d) {
+    d["States"] = d["States"];
+    d.Value = +d.Value;
+    d.Year = d.Year;
+    
+});
+console.log(long_data[4])
+console.log(long_data[5])
+console.log(long_data[6])
+console.log(long_data[7]);
+console.log(long_data);
+
+//earthquakes.forEach(function(d) {
+    //d.States = +d.States;
+//});
+
+var nest = d3.nest()
+      .key(function(d) { return d.location; })
+      .entries(long_data);
+
+
+// Make x scale
+var xScale = d3.scaleBand()
+                    .domain(state_data)
+                    .rangeRound([0, width], 0.1);
+
+  // Compute the scale domains. debug: need to link multiple columns to the y access.=check 
+  x.domain(d3.extent(long_data, function(d) { return d["States"] }));
+  y.domain(d3.extent(long_data, function(d) { return d["Year"] }));
+  z.domain([0, d3.max(long_data, function(d) { return d["Value"] })]);
+
+  // Extend the x- and y-domain to fit the last earthquakes. debug: need to confirm stepsize 
+  // For example, the y-earthquakes 3200 corresponds to values [3200, 3300].
+  x.domain([x.domain()[0], x.domain()[1] ]);
+  y.domain([y.domain()[0], y.domain()[1] ]);
+
+  // Display the tiles for each non-zero earthquake.
+  // See http://bl.ocks.org/3074470 for an alternative implementation. debug: need to include 2010 etc.=check, need to replace count value with 2010 type value=check
+  svg.selectAll(".tile")
+      .data(long_data)
+    .enter().append("rect")
+      .attr("class", "tile")
+      .attr("x", function(d) { return x(d["States"]); })
+      .attr("y", function(d) { return y(d.Year + yStep); })
+      .attr("width", xScale)
+      .attr("height",  y(0) - y(yStep))
+      .style("fill", function(d) { return z(d.Value); });
+
+  // Add a legend for the color values.
+  var legend = svg.selectAll(".legend")
+      .data(z.ticks(6).slice(1).reverse())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + (20 + i * 20) + ")"; });
+
+  legend.append("rect")
+      .attr("width", 20)
+      .attr("height", 20)
+      .style("fill", z);
+
+  legend.append("text")
+      .attr("x", 26)
+      .attr("y", 10)
+      .attr("dy", ".35em")
+      .text(String);
+
+  svg.append("text")
+      .attr("class", "label")
+      .attr("x", width + 20)
+      .attr("y", 10)
+      .attr("dy", ".35em")
+      .text("Count");
+
+  // Add an x-axis with label. debug: figure out what d3.time.days is 
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xScale).ticks(20))
+  svg.append("text")
+      .attr("text-anchor", "end")
+      //.attr("class", "label")
+      .attr("transform", "rotate(-65)")
+      .attr("x", width)
+      .attr("y", -6)
+
+      .text("State");
+
+  // Add a y-axis with label.
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("1", 000)))
+    .append("text")
+      .attr("class", "label")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .text("Year");
+});
+
+
+
+
+</script>

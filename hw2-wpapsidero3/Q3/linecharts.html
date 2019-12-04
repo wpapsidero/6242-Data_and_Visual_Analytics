@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+/* 13. Basic Styling with CSS */
+
+/* Style the lines by removing the fill and applying a stroke */
+.line {
+    fill: none;
+    stroke: #FFC300;
+    stroke-width: 3;
+}
+  
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+  
+  .focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+@media print {
+    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+</style>
+<!-- Body tag is where we will append our SVG and SVG objects-->
+<div id="graph1"></div>
+<div class="pagebreak"> </div>
+<div id="graph2"></div>
+<div class="pagebreak"> </div>
+<div id="graph3"></div>
+<div class="pagebreak"> </div>
+<div id="graph4"></div>
+<body>
+</body>
+
+<!-- Load in the d3 library -->
+<script src="../lib/d3.v5.min.js"></script>
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 30, right: 20, bottom: 50, left: 70},
+    width = 800 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// parse the year / time
+var parseTime = d3.timeParse("%Y");
+
+// set the ranges
+var xScale = d3.scaleTime().range([0, 600]);
+var yScale = d3.scaleLinear().range([height, 0]);
+// y -scale for Graph 3
+var yScaleSQRT = d3.scaleSqrt().range([height, 0]);
+// y -scale for Graph 4
+var yScaleLOG = d3.scaleLog().range([height, 0]);
+
+	
+// create a list of keys for legend 
+var keys = ["5_5.9", "6_6.9", "7_7.9", "8.0+"]
+
+// create color scheme for legend
+var color = d3.scaleOrdinal()
+    .domain(keys)
+    .range(["#FFC300", "#FF5733", "#C70039","#900C3F"]);
+
+
+// -------- define lines for first two graphs --------
+
+
+// define the 1st line
+var valueline = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScale(d["5_5.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 2nd line
+var valueline2 = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScale(d["6_6.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+	
+// define the 3rd line
+var valueline3 = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScale(d["7_7.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 4th line
+var valueline4 = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScale(d["8.0+"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+
+// -------- define lines for Graph 3 --------
+
+
+// define the 1st line
+var valuelineSQRT = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleSQRT(d["5_5.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 2nd line
+var valueline2SQRT = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleSQRT(d["6_6.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+	
+// define the 3rd line
+var valueline3SQRT = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleSQRT(d["7_7.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 4th line
+var valueline4SQRT = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleSQRT(d["8.0+"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+
+// -------- define lines for Graph 4 ---------
+
+
+// define the 1st line
+var valuelineLOG = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleLOG(d["5_5.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 2nd line
+var valueline2LOG = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleLOG(d["6_6.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+	
+// define the 3rd line
+var valueline3LOG = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleLOG(d["7_7.9"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+// define the 4th line
+var valueline4LOG = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScaleLOG(d["8.0+"]); })
+	.curve(d3.curveMonotoneX); // apply smoothing to the line
+
+
+// -------- create SVG objects --------
+
+
+// Graph 1
+var svg1 = d3.select("#graph1").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Graph 2
+var svg2 = d3.select("#graph2").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+// Graph 3
+var svg3 = d3.select("#graph3").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Graph 4
+var svg4 = d3.select("#graph4").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");	
+	
+
+// -------- load the data and create all the graphs inside the function --------
+
+
+d3.dsv(",","earthquakes.csv").then(function(data) {
+  
+  // format the data
+  data.forEach(function(d) {
+      d.year = parseTime(d.year);
+      d["5_5.9"] = +d["5_5.9"];
+      d["6_6.9"] = +d["6_6.9"];
+	  d["7_7.9"] = +d["7_7.9"];
+      d["8.0+"] = +d["8.0+"];
+	  d["Estimated Deaths"] = +d["Estimated Deaths"];
+  });
+
+	// Scale the range of the data
+	xScale.domain(d3.extent(data, function(d) { return d.year; }));
+	yScale.domain([0, d3.max(data, function(d) {
+	  return Math.max(d["6_6.9"], d["5_5.9"]); })]);
+	  
+	// y scale for Graph 3
+	yScaleSQRT.domain([0, d3.max(data, function(d) {
+	  return Math.max(d["6_6.9"], d["5_5.9"]); })]);
+
+	// y scale for Graph 4
+	yScaleLOG.clamp(true).domain([1, d3.max(data, function(d) {
+	  return Math.max(d["6_6.9"], d["5_5.9"]); })]).nice()(0); 	
+
+	
+	// Graph 1 
+	
+	
+	// Add the valueline path.
+	svg1.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", valueline);
+
+	// Add the valueline2 path.
+	svg1.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#FF5733")
+      .attr("d", valueline2);
+	  
+	// Add the valueline3 path.
+	svg1.append("path")
+      .datum(data)
+      .attr("class", "line")
+	  .style("stroke", "#C70039")
+      .attr("d", valueline3);
+
+	// Add the valueline4 path.
+	svg1.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#900C3F")
+      .attr("d", valueline4);
+
+	// Call the x axis in a group tag
+	svg1.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+	// text label for the x axis
+	svg1.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Year");
+
+	// Call the y axis in a group tag
+	svg1.append("g")
+		.attr("class", "y axis")
+		.call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+		
+	// text label for the y axis
+	svg1.append("text")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (height / 2))
+		  .attr("dy", "1em")
+		  .style("text-anchor", "middle")
+		  .text("Num of Earthquakes"); 
+		
+	// chart title
+	svg1.append("text")
+		.attr("x", width / 2 )
+		.attr("y", -10)
+		.style("text-anchor", "middle")
+		.text("Worldwide Earthquake stats 2000-2015");
+	
+	// Add one dot in the legend for each name.
+	var size = 20
+	svg1.selectAll("circles")
+	  .data(keys)
+	  .enter()
+	  .append("rect")
+		.attr("x", 620)
+		.attr("y", function(d,i){ return 0 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+		.attr("width", size)
+		.attr("height", size)
+		.style("fill", function(d){ return color(d)})
+
+	// Add one dot in the legend for each name.
+	svg1.selectAll("mylabels")
+	  .data(keys)
+	  .enter()
+	  .append("text")
+		.attr("x", 620 + size*1.2)
+		.attr("y", function(d,i){ return 0 + i*(size+5) + (size/1.33)}) // 100 is where the first dot appears. 25 is the distance between dots
+		.style("fill", "black")
+		.text(function(d){ return d})
+		.attr("text-anchor", "left")
+		.style("alignment-baseline", "middle")
+	
+	
+	// Graph 2 
+
+	
+	// Add the valueline path.
+	svg2.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", valueline);
+
+	// Add the valueline2 path.
+	svg2.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#FF5733")
+      .attr("d", valueline2);
+	  
+	// Add the valueline3 path.
+	svg2.append("path")
+      .datum(data)
+      .attr("class", "line")
+	  .style("stroke", "#C70039")
+      .attr("d", valueline3);
+
+	// Add the valueline4 path.
+	svg2.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#900C3F")
+      .attr("d", valueline4);
+	  
+	// add circles for each datapoint
+	
+	svg2.selectAll(".cirq1")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScale(d["5_5.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69 })
+	
+	svg2.selectAll(".cirq2")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScale(d["6_6.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69 })
+			
+	svg2.selectAll(".cirq3")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScale(d["7_7.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69 })
+			
+	svg2.selectAll(".cirq4")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScale(d["8.0+"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69 })	
+	
+	
+	// Call the x axis in a group tag
+	svg2.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+	// text label for the x axis
+	svg2.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Year");
+
+	// Call the y axis in a group tag
+	svg2.append("g")
+		.attr("class", "y axis")
+		.call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+		
+	// text label for the y axis
+	svg2.append("text")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (height / 2))
+		  .attr("dy", "1em")
+		  .style("text-anchor", "middle")
+		  .text("Num of Earthquakes"); 
+		
+	// chart title
+	svg2.append("text")
+		.attr("x", width / 2 )
+		.attr("y", -10)
+		.style("text-anchor", "middle")
+		.text("Worldwide Earthquake stats 2000-2015 with symbols");
+	
+	// Add one dot in the legend for each name.
+	var size = 20
+	svg2.selectAll("circles")
+	  .data(keys)
+	  .enter()
+	  .append("rect")
+		.attr("x", 620)
+		.attr("y", function(d,i){ return 0 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
+		.attr("width", size)
+		.attr("height", size)
+		.style("fill", function(d){ return color(d)})
+
+	// Add one dot in the legend for each name.
+	svg2.selectAll("mylabels")
+	  .data(keys)
+	  .enter()
+	  .append("text")
+		.attr("x", 620 + size*1.2)
+		.attr("y", function(d,i){ return 0 + i*(size+5) + (size/1.33) }) // 100 is where the first dot appears. 25 is the distance between dots
+		.style("fill", "black")
+		.text(function(d){ return d})
+		.attr("text-anchor", "left")
+		.style("alignment-baseline", "middle")
+
+	
+	// Graph 3 
+	
+	
+	
+	// Add the valueline path.
+	svg3.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", valuelineSQRT);
+
+	// Add the valueline2 path.
+	svg3.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#FF5733")
+      .attr("d", valueline2SQRT);
+	  
+	// Add the valueline3 path.
+	svg3.append("path")
+      .datum(data)
+      .attr("class", "line")
+	  .style("stroke", "#C70039")
+      .attr("d", valueline3SQRT);
+
+	// Add the valueline4 path.
+	svg3.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#900C3F")
+      .attr("d", valueline4SQRT);
+	  
+	// add circles for each datapoint
+	
+	svg3.selectAll(".cirq1")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleSQRT(d["5_5.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+	
+	svg3.selectAll(".cirq2")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleSQRT(d["6_6.9"])  })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+			
+	svg3.selectAll(".cirq3")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleSQRT(d["7_7.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+			
+	svg3.selectAll(".cirq4")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleSQRT(d["8.0+"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })	
+	
+	
+	// Call the x axis in a group tag
+	svg3.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+	// text label for the x axis
+	svg3.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Year");
+
+	// Call the y axis in a group tag
+	svg3.append("g")
+		.attr("class", "y axis")
+		.call(d3.axisLeft(yScaleSQRT)); // Create an axis component with d3.axisLeft
+		
+	// text label for the y axis
+	svg3.append("text")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (height / 2))
+		  .attr("dy", "1em")
+		  .style("text-anchor", "middle")
+		  .text("Num of Earthquakes"); 
+		
+	// chart title
+	svg3.append("text")
+		.attr("x", width / 2 )
+		.attr("y", -10)
+		.style("text-anchor", "middle")
+		.text("Worldwide Earthquake stats 2000-2015 square root scale");
+	
+	// Add one dot in the legend for each name.
+	var size = 20
+	svg3.selectAll("circles")
+	  .data(keys)
+	  .enter()
+	  .append("rect")
+		.attr("x", 620)
+		.attr("y", function(d,i){ return 0 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
+		.attr("width", size)
+		.attr("height", size)
+		.style("fill", function(d){ return color(d)})
+
+	// Add one dot in the legend for each name.
+	svg3.selectAll("mylabels")
+	  .data(keys)
+	  .enter()
+	  .append("text")
+		.attr("x", 620 + size*1.2)
+		.attr("y", function(d,i){ return 0 + i*(size+5) + (size/1.33) }) // 100 is where the first dot appears. 25 is the distance between dots
+		.style("fill", "black")
+		.text(function(d){ return d})
+		.attr("text-anchor", "left")
+		.style("alignment-baseline", "middle")
+	
+	
+	// Graph 4 
+	
+	
+
+	// Add the valueline path.
+	svg4.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", valuelineLOG);
+
+	// Add the valueline2 path.
+	svg4.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#FF5733")
+      .attr("d", valueline2LOG);
+	  
+	// Add the valueline3 path.
+	svg4.append("path")
+      .datum(data)
+      .attr("class", "line")
+	  .style("stroke", "#C70039")
+      .attr("d", valueline3LOG);
+
+	// Add the valueline4 path.
+	svg4.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .style("stroke", "#900C3F")
+      .attr("d", valueline4LOG);
+	  
+	// add circles for each datapoint
+	
+	svg4.selectAll(".cirq1")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleLOG(d["5_5.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+	
+	svg4.selectAll(".cirq2")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleLOG(d["6_6.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+			
+	svg4.selectAll(".cirq3")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleLOG(d["7_7.9"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })
+			
+	svg4.selectAll(".cirq4")
+		.data(data)
+		.enter().append("circle") // Uses the enter().append() method
+			.attr("class", "dot") // Assign a class for styling
+			.attr("cx", function(d) { return xScale(d.year) })
+			.attr("cy", function(d) { return yScaleLOG(d["8.0+"]) })
+			.attr("r", function(d) { return Math.log(d["Estimated Deaths"])*.69  })	
+	
+	
+	// Call the x axis in a group tag
+	svg4.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+	// text label for the x axis
+	svg4.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Year");
+
+	// Call the y axis in a group tag
+	svg4.append("g")
+		.attr("class", "y axis")
+		.call(d3.axisLeft(yScaleLOG)); // Create an axis component with d3.axisLeft
+		
+	// text label for the y axis
+	svg4.append("text")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (height / 2))
+		  .attr("dy", "1em")
+		  .style("text-anchor", "middle")
+		  .text("Num of Earthquakes"); 
+		
+	// chart title
+	svg4.append("text")
+		.attr("x", width / 2 )
+		.attr("y", -10)
+		.style("text-anchor", "middle")
+		.text("Worldwide Earthquake stats 2000-2015 log scale");
+	
+	// Add one dot in the legend for each name.
+	var size = 20
+	svg4.selectAll("circles")
+	  .data(keys)
+	  .enter()
+	  .append("rect")
+		.attr("x", 620)
+		.attr("y", function(d,i){ return 0 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+		.attr("width", size)
+		.attr("height", size)
+		.style("fill", function(d){ return color(d)})
+
+	// Add one dot in the legend for each name.
+	svg4.selectAll("mylabels")
+	  .data(keys)
+	  .enter()
+	  .append("text")
+		.attr("x", 620 + size*1.2)
+		.attr("y", function(d,i){ return 0 + i*(size+5) + (size/1.33)}) // 100 is where the first dot appears. 25 is the distance between dots
+		.style("fill", "black")
+		.text(function(d){ return d})
+		.attr("text-anchor", "left")
+		.style("alignment-baseline", "middle")
+});
+
+
+</script>
