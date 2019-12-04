@@ -1,0 +1,4 @@
+1.) The main reason to use a random forest over a single decision tree is that it produces better overall estimates by introducing randomness through slightly varying the 
+data from tree to tree and displaying average between multiple trees
+2.) 81 seconds.
+3.)90.75% accuracy.
